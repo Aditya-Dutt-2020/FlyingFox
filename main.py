@@ -1,21 +1,24 @@
+import math
 import cv2
 import numpy as np
 
 LASTPRESSED = 0
 CNTSIZETHRESH = 1000
-#pos = [470, 60]
+DROPRAD = 50
+pos = [710, 60]
 pos = [0,0]
+frameSize = (300, 400)
 cv2.namedWindow('trackbars')
 def nothing(x):
     pass
 
 
 def getFrame():
-    global LASTPRESSED, pos
+    global LASTPRESSED, pos, frameSize
     orig = cv2.imread("DroneCV.png")
-    frameSize = (300, 400)
+
     #frameSize = (800,1000)
-    moveSpeed = 60
+    moveSpeed = 5
     cropped = orig[0:frameSize[0], 0:frameSize[1]]
     if LASTPRESSED == ord('w'):
         pos[0] = pos[0] - moveSpeed if pos[0] - moveSpeed >= 0 else pos[0]
@@ -65,9 +68,24 @@ while True:
     contour = contourList[0]
     M = cv2.moments(contour)
     yPos, xPos = (int(M['m10']/M['m00'])+pos[1], int(M['m01']/M['m00'])+pos[0])
-    print(f'Contour centered at ({yPos}, {xPos}), current pos is {pos[1]}, {pos[0]}')
+    #print(f'Contour centered at ({yPos}, {xPos}), current pos is {pos[1]}, {pos[0]}')
     cv2.drawContours(image=orig_copy, contours=contour, contourIdx=-1, color=(0, 255, 0), thickness=2,
                      lineType=cv2.LINE_AA)
+
+    #drawing Crosses
+    cv2.line(orig_copy, (int(frameSize[1]/2)-10, int(frameSize[0]/2)), (int(frameSize[1]/2)+10, int(frameSize[0]/2)), (0, 0, 255), 2)
+    cv2.line(orig_copy, (int(frameSize[1] / 2) , int(frameSize[0] / 2)-10),(int(frameSize[1] / 2), int(frameSize[0] / 2)+10), (0, 0, 255), 2)
+    cv2.circle(orig_copy, (int(frameSize[1] / 2) , int(frameSize[0] / 2)), DROPRAD, (255, 255, 255), 2)
+
+    cv2.line(orig_copy, (int(M['m10']/M['m00']-10), int(M['m01']/M['m00'])), (int(M['m10']/M['m00']+10), int(M['m01']/M['m00'])), (255, 255, 0), 2)
+    cv2.line(orig_copy, (int(M['m10'] / M['m00']), int(M['m01'] / M['m00'])-10),(int(M['m10'] / M['m00']), int(M['m01'] / M['m00']+10)), (255, 255, 0), 2)
+
+    dist = math.sqrt(pow((int(M['m10']/M['m00']))-(int(frameSize[1] / 2)), 2)+pow((int(M['m01']/M['m00']))-(int(frameSize[0] / 2)), 2))
+
+    if(dist>DROPRAD):
+        cv2.putText(orig_copy, 'ALIGN', (int(frameSize[1] / 2) - 200, 30), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 4)
+    else:
+        cv2.putText(orig_copy, 'DROP', (int(frameSize[1] / 2) - 200, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
     cv2.imshow('orig', orig_copy)
 
 
