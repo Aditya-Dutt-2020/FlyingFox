@@ -5,10 +5,12 @@ import numpy as np
 LASTPRESSED = 0
 CNTSIZETHRESH = 1000
 DROPRAD = 50
+CHECKING = False
 pos = [710, 60]
 pos = [0,0]
 frameSize = (300, 400)
 cv2.namedWindow('trackbars')
+cv2.namedWindow('orig')
 def nothing(x):
     pass
 
@@ -18,7 +20,7 @@ def getFrame():
     orig = cv2.imread("DroneCV.png")
 
     #frameSize = (800,1000)
-    moveSpeed = 5
+    moveSpeed = 30
     cropped = orig[0:frameSize[0], 0:frameSize[1]]
     if LASTPRESSED == ord('w'):
         pos[0] = pos[0] - moveSpeed if pos[0] - moveSpeed >= 0 else pos[0]
@@ -36,13 +38,20 @@ def getFrame():
 
     return cropped
 
+def clicked(event, x, y, flags, param):
+    global CHECKING
+    if event == cv2.EVENT_LBUTTONDOWN and x<=150 and y <=30 and CHECKING:
+        print("BOMBS AWAY!!!")
+
+
+
 cv2.createTrackbar('H_low','trackbars',19,179,nothing)
 cv2.createTrackbar('S_low','trackbars',35,255,nothing)
 cv2.createTrackbar('V_low','trackbars',0,255,nothing)
 cv2.createTrackbar('H_high','trackbars',179,179,nothing)
 cv2.createTrackbar('S_high','trackbars',255,255,nothing)
 cv2.createTrackbar('V_high','trackbars',255,255,nothing)
-
+cv2.setMouseCallback("orig", clicked)
 blockedCoords =[]
 while True:
     LASTPRESSED = cv2.waitKey(1)
@@ -64,7 +73,9 @@ while True:
     contourList = [x for x in contours if cv2.contourArea(x) >=CNTSIZETHRESH]
     if len(contourList) == 0:
         cv2.imshow('orig', orig_copy)
+        CHECKING = False
         continue
+
     contour = contourList[0]
     M = cv2.moments(contour)
     yPos, xPos = (int(M['m10']/M['m00'])+pos[1], int(M['m01']/M['m00'])+pos[0])
@@ -85,7 +96,9 @@ while True:
     if(dist>DROPRAD):
         cv2.putText(orig_copy, 'ALIGN', (int(frameSize[1] / 2) - 200, 30), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 4)
     else:
-        cv2.putText(orig_copy, 'DROP', (int(frameSize[1] / 2) - 200, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
+        CHECKING = True
+        cv2.rectangle(orig_copy, (0,0),(150,30),(0,255,0),-1)
+        cv2.putText(orig_copy, 'DROP?', (int(frameSize[1] / 2) - 200, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
     cv2.imshow('orig', orig_copy)
 
 
