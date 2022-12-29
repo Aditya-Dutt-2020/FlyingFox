@@ -5,12 +5,15 @@ import numpy as np
 LASTPRESSED = 0
 CNTSIZETHRESH = 1000
 DROPRAD = 50
+BLOCKRAD = 30
 CHECKING = False
+CLICKED = False
 pos = [710, 60]
 pos = [0,0]
-frameSize = (300, 400)
+frameSize = (400, 300)
 cv2.namedWindow('trackbars')
 cv2.namedWindow('orig')
+blockedCoords =[]
 def nothing(x):
     pass
 
@@ -20,27 +23,29 @@ def getFrame():
     orig = cv2.imread("DroneCV.png")
 
     #frameSize = (800,1000)
-    moveSpeed = 30
+    moveSpeed = 50
     cropped = orig[0:frameSize[0], 0:frameSize[1]]
     if LASTPRESSED == ord('w'):
         pos[0] = pos[0] - moveSpeed if pos[0] - moveSpeed >= 0 else pos[0]
         #print(f"Pos = ({pos[0]}, {pos[1]})")
     elif LASTPRESSED == ord('s'):
-        pos[0] = pos[0] + moveSpeed if pos[0] + moveSpeed <= orig.shape[0] - frameSize[0] else pos[0]
+        pos[0] = pos[0] + moveSpeed if pos[0] + moveSpeed <= orig.shape[0] - frameSize[1] else pos[0]
         #print(f"Pos = ({pos[0]}, {pos[1]})")
     elif LASTPRESSED == ord('a'):
         pos[1] = pos[1] - moveSpeed if pos[1] - moveSpeed >= 0 else pos[1]
         #print(f"Pos = ({pos[0]}, {pos[1]})")
     elif LASTPRESSED == ord('d'):
-        pos[1] = pos[1] + moveSpeed if pos[1] + moveSpeed <= orig.shape[1] - frameSize[1] else pos[1]
+        pos[1] = pos[1] + moveSpeed if pos[1] + moveSpeed <= orig.shape[1] - frameSize[0] else pos[1]
         #print(f"Pos = ({pos[0]}, {pos[1]})")
-    cropped = orig[pos[0]:pos[0] + frameSize[0], pos[1]:pos[1] + frameSize[1]]
+    cropped = orig[pos[0]:pos[0] + frameSize[1], pos[1]:pos[1] + frameSize[0]]
 
     return cropped
 
 def clicked(event, x, y, flags, param):
-    global CHECKING
+    global CHECKING, CLICKED
     if event == cv2.EVENT_LBUTTONDOWN and x<=150 and y <=30 and CHECKING:
+        CHECKING = False
+        CLICKED = True
         print("BOMBS AWAY!!!")
 
 
@@ -52,7 +57,7 @@ cv2.createTrackbar('H_high','trackbars',179,179,nothing)
 cv2.createTrackbar('S_high','trackbars',255,255,nothing)
 cv2.createTrackbar('V_high','trackbars',255,255,nothing)
 cv2.setMouseCallback("orig", clicked)
-blockedCoords =[]
+
 while True:
     LASTPRESSED = cv2.waitKey(1)
     if LASTPRESSED == ord('q'):
@@ -75,30 +80,35 @@ while True:
         cv2.imshow('orig', orig_copy)
         CHECKING = False
         continue
-
     contour = contourList[0]
     M = cv2.moments(contour)
     yPos, xPos = (int(M['m10']/M['m00'])+pos[1], int(M['m01']/M['m00'])+pos[0])
+    blocked = any([math.sqrt(pow(yPos-x[0], 2) + pow(xPos-x[1], 2)) < BLOCKRAD for x in blockedCoords])
     #print(f'Contour centered at ({yPos}, {xPos}), current pos is {pos[1]}, {pos[0]}')
-    cv2.drawContours(image=orig_copy, contours=contour, contourIdx=-1, color=(0, 255, 0), thickness=2,
+    cv2.drawContours(image=orig_copy, contours=contour, contourIdx=-1, color=(0, 255, 0) if not blocked else (170,170,170), thickness=2,
                      lineType=cv2.LINE_AA)
 
     #drawing Crosses
-    cv2.line(orig_copy, (int(frameSize[1]/2)-10, int(frameSize[0]/2)), (int(frameSize[1]/2)+10, int(frameSize[0]/2)), (0, 0, 255), 2)
-    cv2.line(orig_copy, (int(frameSize[1] / 2) , int(frameSize[0] / 2)-10),(int(frameSize[1] / 2), int(frameSize[0] / 2)+10), (0, 0, 255), 2)
-    cv2.circle(orig_copy, (int(frameSize[1] / 2) , int(frameSize[0] / 2)), DROPRAD, (255, 255, 255), 2)
+    if not blocked:
+        cv2.line(orig_copy, (int(frameSize[0]/2)-10, int(frameSize[1]/2)), (int(frameSize[0]/2)+10, int(frameSize[1]/2)), (0, 0, 255), 2)
+        cv2.line(orig_copy, (int(frameSize[0] / 2) , int(frameSize[1] / 2)-10),(int(frameSize[0] / 2), int(frameSize[1] / 2)+10), (0, 0, 255), 2)
+        cv2.circle(orig_copy, (int(frameSize[0] / 2) , int(frameSize[1] / 2)), DROPRAD, (255, 255, 255), 2)
 
-    cv2.line(orig_copy, (int(M['m10']/M['m00']-10), int(M['m01']/M['m00'])), (int(M['m10']/M['m00']+10), int(M['m01']/M['m00'])), (255, 255, 0), 2)
-    cv2.line(orig_copy, (int(M['m10'] / M['m00']), int(M['m01'] / M['m00'])-10),(int(M['m10'] / M['m00']), int(M['m01'] / M['m00']+10)), (255, 255, 0), 2)
+    cv2.line(orig_copy, (int(M['m10']/M['m00']-10), int(M['m01']/M['m00'])), (int(M['m10']/M['m00']+10), int(M['m01']/M['m00'])), (255, 255, 0) if not blocked else (170,170,170), 2)
+    cv2.line(orig_copy, (int(M['m10'] / M['m00']), int(M['m01'] / M['m00'])-10),(int(M['m10'] / M['m00']), int(M['m01'] / M['m00']+10)), (255, 255, 0)  if not blocked else (170,170,170), 2)
 
-    dist = math.sqrt(pow((int(M['m10']/M['m00']))-(int(frameSize[1] / 2)), 2)+pow((int(M['m01']/M['m00']))-(int(frameSize[0] / 2)), 2))
+    dist = math.sqrt(pow((int(M['m10']/M['m00']))-(int(frameSize[0] / 2)), 2)+pow((int(M['m01']/M['m00']))-(int(frameSize[1] / 2)), 2))
 
-    if(dist>DROPRAD):
-        cv2.putText(orig_copy, 'ALIGN', (int(frameSize[1] / 2) - 200, 30), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 4)
-    else:
+    if(dist>DROPRAD) and not blocked:
+        cv2.putText(orig_copy, 'ALIGN', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 4)
+    elif not blocked:
         CHECKING = True
+        if CLICKED:
+            CHECKING = False
+            CLICKED = False
+            blockedCoords.append((yPos, xPos))
         cv2.rectangle(orig_copy, (0,0),(150,30),(0,255,0),-1)
-        cv2.putText(orig_copy, 'DROP?', (int(frameSize[1] / 2) - 200, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
+        cv2.putText(orig_copy, 'DROP?', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
     cv2.imshow('orig', orig_copy)
 
 
