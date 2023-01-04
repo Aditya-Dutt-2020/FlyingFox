@@ -4,6 +4,7 @@ import numpy as np
 
 LASTPRESSED = 0
 CNTSIZETHRESH = 1000
+SMALLTHRESH = 3000
 DROPRAD = 50
 BLOCKRAD = 30
 CHECKING = False
@@ -14,6 +15,7 @@ frameSize = (400, 300)
 cv2.namedWindow('trackbars')
 cv2.namedWindow('orig')
 blockedCoords =[]
+param = [False]
 def nothing(x):
     pass
 
@@ -46,7 +48,8 @@ def clicked(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN and x<=150 and y <=30 and CHECKING:
         CHECKING = False
         CLICKED = True
-        print("BOMBS AWAY!!!")
+        print(("BIG" if param[0] else "SMALL") + " BOMBS AWAY")
+
 
 
 
@@ -56,7 +59,7 @@ cv2.createTrackbar('V_low','trackbars',0,255,nothing)
 cv2.createTrackbar('H_high','trackbars',179,179,nothing)
 cv2.createTrackbar('S_high','trackbars',255,255,nothing)
 cv2.createTrackbar('V_high','trackbars',255,255,nothing)
-cv2.setMouseCallback("orig", clicked)
+cv2.setMouseCallback("orig", clicked, param)
 
 while True:
     LASTPRESSED = cv2.waitKey(1)
@@ -81,10 +84,12 @@ while True:
         CHECKING = False
         continue
     contour = contourList[0]
+
     M = cv2.moments(contour)
     yPos, xPos = (int(M['m10']/M['m00'])+pos[1], int(M['m01']/M['m00'])+pos[0])
     blocked = any([math.sqrt(pow(yPos-x[0], 2) + pow(xPos-x[1], 2)) < BLOCKRAD for x in blockedCoords])
-    #print(f'Contour centered at ({yPos}, {xPos}), current pos is {pos[1]}, {pos[0]}')
+    #print(f'Contour centered at ({yPos}, {xPos}), current pos is {pos[1]}, {pos[0]}
+    param[0] = cv2.contourArea(contour) >= SMALLTHRESH
     cv2.drawContours(image=orig_copy, contours=contour, contourIdx=-1, color=(0, 255, 0) if not blocked else (170,170,170), thickness=2,
                      lineType=cv2.LINE_AA)
 
@@ -107,6 +112,7 @@ while True:
             CHECKING = False
             CLICKED = False
             blockedCoords.append((yPos, xPos))
+
         cv2.rectangle(orig_copy, (0,0),(150,30),(0,255,0),-1)
         cv2.putText(orig_copy, 'DROP?', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
     cv2.imshow('orig', orig_copy)
