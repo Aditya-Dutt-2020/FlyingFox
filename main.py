@@ -60,7 +60,7 @@ cv2.createTrackbar('H_high','trackbars',179,179,nothing)
 cv2.createTrackbar('S_high','trackbars',255,255,nothing)
 cv2.createTrackbar('V_high','trackbars',255,255,nothing)
 cv2.setMouseCallback("orig", clicked, param)
-
+saveCount = 0
 while True:
     LASTPRESSED = cv2.waitKey(1)
     if LASTPRESSED == ord('q'):
@@ -115,6 +115,13 @@ while True:
 
         cv2.rectangle(orig_copy, (0,0),(150,30),(0,255,0),-1)
         cv2.putText(orig_copy, 'DROP?', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
+    if LASTPRESSED == ord('p'):
+        cv2.imwrite("img"+str(saveCount)+".jpg", orig_copy)
+        saveCount += 1
+    if LASTPRESSED == ord('o'):
+        cv2.imwrite("blur.jpg", frame)
+        cv2.imwrite("hsv.jpg", hsv)
+        cv2.imwrite("mask.jpg", mask)
     cv2.imshow('orig', orig_copy)
 
 
