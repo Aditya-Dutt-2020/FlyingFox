@@ -60,6 +60,7 @@ def clicked(event, x, y, flags, param):
         CHECKING = False
         CLICKED = True
         print(("BIG" if param[0] else "SMALL") + " BOMBS AWAY")
+        client.publish("inTopic",("BIG" if param[0] else "SMALL"))
 
 
 
@@ -80,13 +81,13 @@ client.on_message=on_message
 client.username_pw_set("ANRV_Mos", "flyingMos") 
 client.connect("localhost", 1883, 60)
 client.loop_start()
-print("Subscribing to topic","inTopic")
-client.subscribe("inTopic")
-print("Publishing message to topic","outTopic")
-client.publish("outTopic","OFFlmfao")
+print("Subscribing to topic","outTopic")
+client.subscribe("outTopic")
+print("Publishing message to topic","inTopic")
+client.publish("inTopic","OFFlmfao")
 location = [0,0]
 while True:
-    client.loop(timeout=0.01)
+    #client.loop(timeout=0.01)
     print(location)
     LASTPRESSED = cv2.waitKey(1)
     if LASTPRESSED == ord('q'):
