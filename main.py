@@ -131,7 +131,7 @@ while True:
     dist = math.sqrt(pow((int(M['m10']/M['m00']))-(int(frameSize[0] / 2)), 2)+pow((int(M['m01']/M['m00']))-(int(frameSize[1] / 2)), 2))
 
     if(dist>DROPRAD) and not blocked:
-        cv2.putText(orig_copy, 'ALIGN', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 4)
+        cv2.putText(orig_copy, 'ALIGNlol', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 4)
     elif not blocked:
         CHECKING = True
         if CLICKED:
