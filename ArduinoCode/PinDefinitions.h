@@ -6,8 +6,8 @@
 //#define trig A1
 #define gpsRX 14
 #define gpsTX 12
-#define smallDispPin 4
-#define bigDispPin 13
+#define smallDispPin 5
+#define bigDispPin 16
 Servo smallDisp;
 Servo bigDisp;
 

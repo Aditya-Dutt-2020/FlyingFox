@@ -19,11 +19,11 @@ void setup() {
 void loop() {
   client.loop();
   int x;
-  //landingLogic();
+//landingLogic();
   getLatLon();
   char GPSBuff[50];
   sprintf(GPSBuff, "%f %f", latlon[0], latlon[1]);
-  //Serial.println(GPSBuff);
+  Serial.println(GPSBuff);
   client.publish("outTopic", GPSBuff);
   if (millis() >= startTime+dispSpinTime && SPINNING)
   {

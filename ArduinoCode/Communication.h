@@ -1,9 +1,11 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "PinDefinitions.h"
+#define LISTEN_PORT 80
 const char* ssid = "ANRV_WIFI";
 const char* password = "flyingfox";
 const char* mqtt_server = "fe80::bccf:7a85:6bd6:88c4";
+//const char* mqtt_server = "192.168.4.1";
 const char* mqtt_username = "ANRV_Mos";
 const char* mqtt_password = "flyingMos";
 const char* clientID = "Dutts ESP";
@@ -28,7 +30,7 @@ void setup_wifi() {
   IPAddress subnet(255, 255, 255, 0);
   WiFi.config(ip, gateway, subnet);
   WiFi.begin(ssid, password);
-
+  
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(WiFi.status());
