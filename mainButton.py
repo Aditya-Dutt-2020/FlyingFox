@@ -1,7 +1,8 @@
 import math
 import cv2
 import numpy as np
-import paho.mqtt.client as mqtt 
+import paho.mqtt.client as mqtt
+import RPi.GPIO as GPIO
 import time
 
 LASTPRESSED = 0
@@ -54,9 +55,15 @@ def getFrame():
 
     return cropped
 
-def clicked(event, x, y, flags, param):
+def clicked(channel):
     global CHECKING, CLICKED
-    if event == cv2.EVENT_LBUTTONDOWN and x<=150 and y <=30 and CHECKING:
+    if time.time() - clicked.last_call < 0.1:
+        return
+    clicked.last_call = time.time()
+
+    # Check button state before printing message
+    if GPIO.input(17) == GPIO.LOW and CHECKING:
+        print("Button pressed")
         CHECKING = False
         CLICKED = True
         print(("BIG" if param[0] else "SMALL") + " BOMBS AWAY")
@@ -70,7 +77,10 @@ cv2.createTrackbar('V_low','trackbars',0,255,nothing)
 cv2.createTrackbar('H_high','trackbars',179,179,nothing)
 cv2.createTrackbar('S_high','trackbars',255,255,nothing)
 cv2.createTrackbar('V_high','trackbars',255,255,nothing)
-cv2.setMouseCallback("orig", clicked, param)
+clicked.last_call = 0
+
+# Add event listener for button press
+GPIO.add_event_detect(17, GPIO.FALLING, callback=clicked, bouncetime=200)
 saveCount = 0
 
 
