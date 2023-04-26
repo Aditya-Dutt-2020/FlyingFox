@@ -5,6 +5,9 @@ import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 import time
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
 LASTPRESSED = 0
 CNTSIZETHRESH = 1000
 SMALLTHRESH = 3000
