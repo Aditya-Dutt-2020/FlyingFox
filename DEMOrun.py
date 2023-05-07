@@ -62,8 +62,8 @@ def clicked(channel):
         CLICKED = True
         CHECKING=False
         print("Button pressed")
-        print(("BIG" if param[0] else "SMALL") + " BOMBS AWAY")
-        client.publish("inTopic", ("BIG" if param[0] else "SMALL"))
+        print(("ORANGE" if param[0] else "SMALL") + " BOMBS AWAY")
+        client.publish("inTopic", ("ORANGE" if param[0] else "SMALL"))
 
 cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
