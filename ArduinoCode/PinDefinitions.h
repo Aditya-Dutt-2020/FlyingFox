@@ -11,7 +11,7 @@
 Servo smallDisp;
 Servo bigDisp;
 
-int dispSpinTime = 1000;
+int dispSpinTime = 275;
 bool SPINNING = false;
 unsigned long startTime = 0;
 #endif

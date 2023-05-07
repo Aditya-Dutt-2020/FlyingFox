@@ -5,8 +5,16 @@ import PIL
 def nothing(x):
     pass
 def contOrange(hsvImg):
-    lower = (135, 0, 199)
-    upper = (180, 255, 255)
+    '''h_min = cv2.getTrackbarPos('H_min', 'trackbar')
+    s_min = cv2.getTrackbarPos('S_min', 'trackbar')
+    v_min = cv2.getTrackbarPos('V_min', 'trackbar')
+    h_max = cv2.getTrackbarPos('H_max', 'trackbar')
+    s_max = cv2.getTrackbarPos('S_max', 'trackbar')
+    v_max = cv2.getTrackbarPos('V_max', 'trackbar')
+    lower=(h_min, s_min, v_min)
+    upper =(h_max, s_max, v_max)'''
+    lower = (22, 151, 163)
+    upper = (66, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -17,8 +25,8 @@ def contOrange(hsvImg):
         #print("no cont")
         return False, None, -1
 def contPurple(hsvImg):
-    lower = (0, 0, 205)
-    upper = (130, 255, 223)
+    lower = (109, 151, 165)
+    upper = (180, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -39,7 +47,7 @@ cv2.createTrackbar('H_max', 'trackbar', 180, 180, nothing)
 cv2.createTrackbar('S_max', 'trackbar', 255, 255, nothing)
 cv2.createTrackbar('V_max', 'trackbar', 255, 255, nothing)
 kernel = (13,13)
-satConst = 10
+satConst = 15
 brightConst = 0.6
 # Load the trackbar
 

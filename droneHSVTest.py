@@ -2,8 +2,8 @@ import cv2
 CNTSIZETHRESH = 8000
 
 def contOrange(hsvImg):
-    lower = (135, 0, 199)
-    upper = (180, 255, 255)
+    lower = (22, 151, 163)
+    upper = (66, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -15,8 +15,8 @@ def contOrange(hsvImg):
         return False, None, -1
 
 def contPurple(hsvImg):
-    lower = (0, 0, 205)
-    upper = (130, 255, 223)
+    lower = (109, 151, 165)
+    upper = (180, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -33,7 +33,7 @@ def getFrame():
 cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
 kernel = (13,13)
-satConst = 10
+satConst = 15
 
 while True:
     img = getFrame()
