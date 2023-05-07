@@ -44,7 +44,7 @@ brightConst = 0.6
 # Load the trackbar
 
 while True:
-    img = cv2.blur(cv2.imread('Purple.jpg'), kernel)
+    img = cv2.blur(cv2.imread('Orange.jpg'), kernel)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hsv[..., 1] = hsv[..., 1] * satConst
     # Get the current trackbar values
@@ -59,11 +59,11 @@ while True:
     pStats = contPurple(hsv)
     if oStats[0] and oStats[2] > pStats[2]:
         print("ORANGE")
-        cv2.drawContours(img, [oStats[1]], -1, (0, 0, 0), 3)
+        cv2.drawContours(img, [oStats[1]], -1, (1, 65, 116), 3)
 
     if pStats[0] and pStats[2] > oStats[2]:
         print("Purple")
-        cv2.drawContours(img, [pStats[1]], -1, (0, 0, 0), 3)
+        cv2.drawContours(img, [pStats[1]], -1, (103, 1, 103), 3)
 
     cv2.imshow('image', img)
     # Check for key presses
