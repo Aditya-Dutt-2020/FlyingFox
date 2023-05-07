@@ -4,8 +4,8 @@ CNTSIZETHRESH = 8000
 DROPRAD = 50
 BLOCKRAD = 30
 def contOrange(hsvImg):
-    lower = (135, 0, 199)
-    upper = (180, 255, 255)
+    lower = (22, 90, 214)
+    upper = (45, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -17,8 +17,8 @@ def contOrange(hsvImg):
         return False, None, -1
 
 def contPurple(hsvImg):
-    lower = (0, 0, 205)
-    upper = (130, 255, 223)
+    lower = (70, 10, 40)
+    upper = (180, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -35,13 +35,13 @@ def getFrame():
 cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
 kernel = (13,13)
-satConst = 10
+satConst = 15
 
 while True:
     k = cv2.waitKey(1) & 0xFF
     if k == 27:  # Escape key
         break
-    img = getFrame()
+    img = cv2.blur(getFrame(), kernel)
     orig_copy = img.copy()
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hsv[..., 1] = hsv[..., 1] * satConst
@@ -53,11 +53,11 @@ while True:
         cv2.drawContours(orig_copy, [oStats[1]], -1, (1, 65, 116), 3)
         contour = oStats[1]
 
-    elif pStats[0] and pStats[2] > oStats[2]:
+    if pStats[0] and pStats[2] > oStats[2]:
         print("Purple")
         cv2.drawContours(orig_copy, [pStats[1]], -1, (103, 1, 103), 3)
         contour = pStats[1]
-    else:
+    if not (pStats[0] or oStats[0]):
         print("nada")
         cv2.imshow('image', orig_copy)
         continue

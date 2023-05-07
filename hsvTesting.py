@@ -5,17 +5,18 @@ import PIL
 def nothing(x):
     pass
 def contOrange(hsvImg):
-    '''h_min = cv2.getTrackbarPos('H_min', 'trackbar')
+    h_min = cv2.getTrackbarPos('H_min', 'trackbar')
     s_min = cv2.getTrackbarPos('S_min', 'trackbar')
     v_min = cv2.getTrackbarPos('V_min', 'trackbar')
     h_max = cv2.getTrackbarPos('H_max', 'trackbar')
     s_max = cv2.getTrackbarPos('S_max', 'trackbar')
     v_max = cv2.getTrackbarPos('V_max', 'trackbar')
     lower=(h_min, s_min, v_min)
-    upper =(h_max, s_max, v_max)'''
-    lower = (22, 151, 163)
-    upper = (66, 255, 255)
+    upper =(h_max, s_max, v_max)
+    #lower = (22, 151, 163)
+    #upper = (66, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
+    cv2.imshow("orangeMask", mask)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -40,10 +41,10 @@ def contPurple(hsvImg):
 cv2.namedWindow('trackbar')
 
 # Create trackbars for the minimum and maximum HSV values
-cv2.createTrackbar('H_min', 'trackbar', 135, 180, nothing)
-cv2.createTrackbar('S_min', 'trackbar', 0, 255, nothing)
-cv2.createTrackbar('V_min', 'trackbar', 199, 255, nothing)
-cv2.createTrackbar('H_max', 'trackbar', 180, 180, nothing)
+cv2.createTrackbar('H_min', 'trackbar', 22, 180, nothing)
+cv2.createTrackbar('S_min', 'trackbar', 117, 255, nothing)
+cv2.createTrackbar('V_min', 'trackbar', 214, 255, nothing)
+cv2.createTrackbar('H_max', 'trackbar', 50, 180, nothing)
 cv2.createTrackbar('S_max', 'trackbar', 255, 255, nothing)
 cv2.createTrackbar('V_max', 'trackbar', 255, 255, nothing)
 kernel = (13,13)
@@ -52,7 +53,7 @@ brightConst = 0.6
 # Load the trackbar
 
 while True:
-    img = cv2.blur(cv2.imread('Orange.jpg'), kernel)
+    img = cv2.blur(cv2.imread('Purple.jpg'), kernel)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hsv[..., 1] = hsv[..., 1] * satConst
     # Get the current trackbar values

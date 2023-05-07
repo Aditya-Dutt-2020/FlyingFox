@@ -2,9 +2,10 @@ import cv2
 CNTSIZETHRESH = 8000
 
 def contOrange(hsvImg):
-    lower = (22, 151, 163)
-    upper = (66, 255, 255)
+    lower = (22, 90, 214)
+    upper = (45, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
+    cv2.imshow("Orangemask", mask)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -15,9 +16,10 @@ def contOrange(hsvImg):
         return False, None, -1
 
 def contPurple(hsvImg):
-    lower = (109, 151, 165)
+    lower = (80, 19, 50)
     upper = (180, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
+    cv2.imshow("Purplemask", mask)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -28,7 +30,7 @@ def contPurple(hsvImg):
         return False, None, -1
 def getFrame():
     ret, image = cam.read()
-    return cv2.resize(image, frameSize, interpolation = cv2.INTER_AREA)
+    return cv2.blur(cv2.resize(image, frameSize, interpolation = cv2.INTER_AREA), kernel)
 
 cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
@@ -52,7 +54,7 @@ while True:
     else:
         print("nada")
 
-    cv2.imshow('image', img)
+    #cv2.imshow('image', img)
     # Check for key presses
     k = cv2.waitKey(1) & 0xFF
     if k == 27:  # Escape key

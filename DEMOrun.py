@@ -12,8 +12,8 @@ DROPRAD = 50
 BLOCKRAD = 30
 
 def contOrange(hsvImg):
-    lower = (135, 0, 199)
-    upper = (180, 255, 255)
+    lower = (22, 90, 214)
+    upper = (45, 255, 255)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -25,8 +25,8 @@ def contOrange(hsvImg):
         return False, None, -1
 
 def contPurple(hsvImg):
-    lower = (0, 0, 205)
-    upper = (130, 255, 223)
+    lower = (70, 10, 40)
+    upper = (180, 255, 223)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -66,7 +66,7 @@ def clicked(channel):
 cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
 kernel = (13,13)
-satConst = 10
+satConst = 15
 clicked.last_call = 0
 # Add event listener for button press
 GPIO.add_event_detect(17, GPIO.FALLING, callback=clicked, bouncetime=200)
@@ -77,7 +77,7 @@ while True:
     k = cv2.waitKey(1) & 0xFF
     if k == 27:  # Escape key
         break
-    img = getFrame()
+    img = cv2.blur(getFrame(), kernel)
     orig_copy = img.copy()
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hsv[..., 1] = hsv[..., 1] * satConst
