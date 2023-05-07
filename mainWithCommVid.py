@@ -39,7 +39,7 @@ def getFrame():
     return cv2.resize(image, frameSize, interpolation = cv2.INTER_AREA)
 
 def clicked(channel):
-    global CHECKING, CLICKED
+    global CHECKING, CLICKED, param
     if time.time() - clicked.last_call < 0.1:
         return
     clicked.last_call = time.time()

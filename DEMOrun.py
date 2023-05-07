@@ -10,10 +10,11 @@ GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 CNTSIZETHRESH = 8000
 DROPRAD = 50
 BLOCKRAD = 30
-
+CHECKING = False
+CLICKED = False
 def contOrange(hsvImg):
-    lower = (22, 90, 214)
-    upper = (45, 255, 255)
+    lower = (9, 62, 132)
+    upper = (29, 162, 232)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -25,8 +26,8 @@ def contOrange(hsvImg):
         return False, None, -1
 
 def contPurple(hsvImg):
-    lower = (70, 10, 40)
-    upper = (180, 255, 223)
+    lower = (102, 57, 165)
+    upper = (122, 157, 265)
     mask = cv2.inRange(hsvImg, lower, upper)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -51,17 +52,18 @@ def on_message(client, userdata, message):
     print("received message", message.payload.decode("utf-8"))
     location = [float(num) for num in message.payload.decode("utf-8").split(" ")]
 def clicked(channel):
-    global param
+    global param, CHECKING, CLICKED
     if time.time() - clicked.last_call < 0.1:
         return
     clicked.last_call = time.time()
 
     # Check button state before printing message
-    if GPIO.input(17) == GPIO.LOW:
-        print("Button pressed")
-        CHECKING = False
+    if GPIO.input(17) == GPIO.LOW and CHECKING:
         CLICKED = True
+        CHECKING=False
+        print("Button pressed")
         print(("BIG" if param[0] else "SMALL") + " BOMBS AWAY")
+        client.publish("inTopic", ("BIG" if param[0] else "SMALL"))
 
 cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
@@ -72,6 +74,17 @@ clicked.last_call = 0
 GPIO.add_event_detect(17, GPIO.FALLING, callback=clicked, bouncetime=200)
 saveCount = 0
 param = [False]
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message=on_message
+client.username_pw_set("ANRV_Mos", "flyingMos")
+client.connect("localhost", 1883, 60)
+client.loop_start()
+print("Subscribing to topic","outTopic")
+client.subscribe("outTopic")
+print("Publishing message to topic","inTopic")
+client.publish("inTopic","OFFlmfao")
 
 while True:
     k = cv2.waitKey(1) & 0xFF
@@ -86,11 +99,13 @@ while True:
 
     if oStats[0] and oStats[2] > pStats[2]:
         print("ORANGE")
+        param[0]=False
         cv2.drawContours(orig_copy, [oStats[1]], -1, (1, 65, 116), 3)
         contour = oStats[1]
 
     elif pStats[0] and pStats[2] > oStats[2]:
         print("Purple")
+        param[0]=True
         cv2.drawContours(orig_copy, [pStats[1]], -1, (103, 1, 103), 3)
         contour = pStats[1]
     else:
@@ -117,8 +132,10 @@ while True:
         (int(M['m01'] / M['m00'])) - (int(frameSize[1] / 2)), 2))
     if (dist > DROPRAD):
         cv2.putText(orig_copy, 'ALIGN', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 4)
+        CHECKING=False
     else:
         cv2.rectangle(orig_copy, (0, 0), (150, 30), (0, 255, 0), -1)
         cv2.putText(orig_copy, 'DROP?', (0, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 4)
+        CHECKING=True
     cv2.imshow('image', orig_copy)
     # Check for key presses
