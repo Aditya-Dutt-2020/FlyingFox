@@ -3,6 +3,8 @@ import math
 import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 import time
+import json
+import numpy as np
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -13,9 +15,9 @@ BLOCKRAD = 30
 CHECKING = False
 CLICKED = False
 def contOrange(hsvImg):
-    lower = (9, 62, 132)
-    upper = (29, 162, 232)
-    mask = cv2.inRange(hsvImg, lower, upper)
+    global json_object
+    lower, upper = json_object["Orange"]
+    mask = cv2.inRange(hsvImg, np.array(lower), np.array(upper))
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -26,9 +28,9 @@ def contOrange(hsvImg):
         return False, None, -1
 
 def contPurple(hsvImg):
-    lower = (102, 57, 165)
-    upper = (122, 157, 265)
-    mask = cv2.inRange(hsvImg, lower, upper)
+    global json_object
+    lower, upper = json_object["Purple"]
+    mask = cv2.inRange(hsvImg, np.array(lower), np.array(upper))
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -86,6 +88,10 @@ client.subscribe("outTopic")
 print("Publishing message to topic","inTopic")
 client.publish("inTopic","OFFlmfao")
 
+with open('calibration.json', 'r') as openfile:
+    # Reading from json file
+    json_object = json.load(openfile)
+
 while True:
     k = cv2.waitKey(1) & 0xFF
     if k == 27:  # Escape key
@@ -93,7 +99,7 @@ while True:
     img = cv2.blur(getFrame(), kernel)
     orig_copy = img.copy()
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    hsv[..., 1] = hsv[..., 1] * satConst
+    #hsv[..., 1] = hsv[..., 1] * satConst
     oStats = contOrange(hsv)
     pStats = contPurple(hsv)
 
