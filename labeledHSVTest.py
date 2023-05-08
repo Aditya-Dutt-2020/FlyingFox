@@ -1,12 +1,13 @@
 import cv2
 import math
+import json
+import numpy as np
 CNTSIZETHRESH = 8000
 DROPRAD = 50
 BLOCKRAD = 30
 def contOrange(hsvImg):
-    lower = (22, 90, 214)
-    upper = (45, 255, 255)
-    mask = cv2.inRange(hsvImg, lower, upper)
+    lower, upper = json_object["Orange"]
+    mask = cv2.inRange(hsvImg, np.array(lower), np.array(upper))
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -17,9 +18,8 @@ def contOrange(hsvImg):
         return False, None, -1
 
 def contPurple(hsvImg):
-    lower = (70, 10, 40)
-    upper = (180, 255, 255)
-    mask = cv2.inRange(hsvImg, lower, upper)
+    lower, upper = json_object["Purple"]
+    mask = cv2.inRange(hsvImg, np.array(lower), np.array(upper))
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -36,6 +36,9 @@ cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
 kernel = (13,13)
 satConst = 15
+with open('calibration.json', 'r') as openfile:
+    # Reading from json file
+    json_object = json.load(openfile)
 
 while True:
     k = cv2.waitKey(1) & 0xFF

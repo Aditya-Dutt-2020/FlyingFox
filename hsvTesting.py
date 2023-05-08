@@ -1,21 +1,24 @@
 import cv2
 import numpy as np
 import PIL
+import json
 # Define the callback function for the trackbars
 def nothing(x):
     pass
 def contOrange(hsvImg):
-    h_min = cv2.getTrackbarPos('H_min', 'trackbar')
+    global json_object
+    '''h_min = cv2.getTrackbarPos('H_min', 'trackbar')
     s_min = cv2.getTrackbarPos('S_min', 'trackbar')
     v_min = cv2.getTrackbarPos('V_min', 'trackbar')
     h_max = cv2.getTrackbarPos('H_max', 'trackbar')
     s_max = cv2.getTrackbarPos('S_max', 'trackbar')
     v_max = cv2.getTrackbarPos('V_max', 'trackbar')
     lower=(h_min, s_min, v_min)
-    upper =(h_max, s_max, v_max)
+    upper =(h_max, s_max, v_max)'''
     #lower = (22, 151, 163)
     #upper = (66, 255, 255)
-    mask = cv2.inRange(hsvImg, lower, upper)
+    lower, upper = json_object["Orange"]
+    mask = cv2.inRange(hsvImg, np.array(lower), np.array(upper))
     cv2.imshow("orangeMask", mask)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
@@ -26,9 +29,12 @@ def contOrange(hsvImg):
         #print("no cont")
         return False, None, -1
 def contPurple(hsvImg):
-    lower = (109, 151, 165)
-    upper = (180, 255, 255)
-    mask = cv2.inRange(hsvImg, lower, upper)
+    global json_object
+    #lower = (109, 151, 165)
+    #upper = (180, 255, 255)
+
+    lower,upper = json_object["Purple"]
+    mask = cv2.inRange(hsvImg, np.array(lower), np.array(upper))
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     try:
         biggest_contour = max(contours, key=cv2.contourArea)
@@ -51,6 +57,10 @@ kernel = (13,13)
 satConst = 15
 brightConst = 0.6
 # Load the trackbar
+with open('calibration.json', 'r') as openfile:
+    # Reading from json file
+    json_object = json.load(openfile)
+
 
 while True:
     img = cv2.blur(cv2.imread('Purple.jpg'), kernel)
