@@ -11,9 +11,8 @@ void setup() {
   smallDisp.attach(smallDispPin);
   setup_wifi();
   client.setCallback(callback);
-  while(!client.connected()) {
+  while(!client.connected())
     reconnect();
-  }
 }
 
 void loop() {
@@ -25,12 +24,14 @@ void loop() {
   sprintf(GPSBuff, "%f %f", latlon[0], latlon[1]);
   //Serial.println(GPSBuff);
   client.publish("outTopic", GPSBuff);
-  if (millis() >= startTime+dispSpinTime && SPINNING)
-  {
-    Serial.println("stopped spinning");
-    bigDisp.write(90);
-    smallDisp.write(90);
-    SPINNING = false;
-  }
+  /*
+  0.15 deg/us
+  
+  1200 = 180 deg
+  go between 900 and 2100
+  */
+  bigDisp.writeMicroseconds(bigStat ? 900 : 2100);
+  smallDisp.writeMicroseconds(smallStat ? 900 : 2100);
+
 }
 

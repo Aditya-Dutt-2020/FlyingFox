@@ -59,17 +59,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
   {
     digitalWrite(BUILTIN_LED, LOW);
     Serial.println("spinning big");
-    bigDisp.write(180);
-    SPINNING = true;
-    startTime = millis();
+    bigStat = !bigStat;
   }
   if ((char)payload[0] == 'S')
   {
     digitalWrite(BUILTIN_LED, LOW);
     Serial.println("spinning small");
-    smallDisp.write(180);
-    SPINNING = true;
-    startTime = millis();
+    smallStat = !smallStat;
   }
 }
 
