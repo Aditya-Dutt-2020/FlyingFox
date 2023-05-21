@@ -52,7 +52,7 @@ def on_connect(client, userdata, flags, rc):
         print(f"Connected fail with code {rc}")
 def on_message(client, userdata, message):
     global location
-    print("received message", message.payload.decode("utf-8"))
+    #print("received message", message.payload.decode("utf-8"))
     location = ([float(num) for num in message.payload.decode("utf-8").split(" ")][0],[float(num) for num in message.payload.decode("utf-8").split(" ")][1])
 def clicked(channel):
     global param, CHECKING, CLICKED, blockedCoords
@@ -64,7 +64,7 @@ def clicked(channel):
     if GPIO.input(17) == GPIO.LOW and CHECKING:
         CLICKED = True
         CHECKING=False
-        print("Button pressed")
+        #print("Button pressed")
         print(("ORANGE" if param[0] else "SMALL") + " BOMBS AWAY")
         client.publish("inTopic", ("ORANGE" if param[0] else "SMALL"))
         blockedCoords += location
@@ -96,6 +96,7 @@ with open('calibration.json', 'r') as openfile:
     json_object = json.load(openfile)
 
 while True:
+    print(location)
     k = cv2.waitKey(1) & 0xFF
     if k == 27:  # Escape key
         break
@@ -107,20 +108,20 @@ while True:
     pStats = contPurple(hsv)
 
     if oStats[0] and oStats[2] > pStats[2]:
-        print("ORANGE")
+        #print("ORANGE")
         param[0]=False
         blocked = any([geopy.distance.distance(location, x) < BLOCKDIST for x in blockedCoords])
         cv2.drawContours(orig_copy, [oStats[1]], -1, (1, 65, 116) if not blocked else (170,170,170), 3)
         contour = oStats[1]
 
     elif pStats[0] and pStats[2] > oStats[2]:
-        print("Purple")
+        #print("Purple")
         param[0]=True
         blocked = any([geopy.distance.distance(location, x) < BLOCKDIST for x in blockedCoords])
         cv2.drawContours(orig_copy, [pStats[1]], -1, (103, 1, 103)  if not blocked else (170,170,170), 3)
         contour = pStats[1]
     else:
-        print("nada")
+        #print("nada")
         cv2.imshow('image', orig_copy)
         continue
 
