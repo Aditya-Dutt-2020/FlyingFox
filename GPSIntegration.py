@@ -10,7 +10,7 @@ import geopy.distance
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-CNTSIZETHRESH = 7000
+CNTSIZETHRESH = 5000
 BLOCKDIST = 5
 DROPRAD = 50
 CHECKING = False
@@ -66,12 +66,12 @@ def clicked(channel):
         CHECKING=False
         #print("Button pressed")
         print(("ORANGE" if param[0] else "SMALL") + " BOMBS AWAY")
-        client.publish("inTopic", ("ORANGE" if param[0] else "SMALL"))
+        client.publish("inTopic", ("BIG" if param[0] else "SMALL"))
         blockedCoords += location
 
 cam = cv2.VideoCapture(0)
 frameSize = (400, 300)
-kernel = (13,13)
+kernel = (5,5)
 satConst = 15
 clicked.last_call = 0
 # Add event listener for button press
