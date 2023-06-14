@@ -9,9 +9,10 @@ import geopy.distance
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
+cv2.namedWindow("image", cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty("image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 CNTSIZETHRESH = 5000
-BLOCKDIST = 5
+BLOCKDIST = 30
 DROPRAD = 50
 CHECKING = False
 CLICKED = False
@@ -47,7 +48,7 @@ def getFrame():
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        print("Connected success")
+        print("Connected success, block dist,", BLOCKDIST)
     else:
         print(f"Connected fail with code {rc}")
 def on_message(client, userdata, message):
@@ -67,10 +68,10 @@ def clicked(channel):
         #print("Button pressed")
         print(("ORANGE" if param[0] else "SMALL") + " BOMBS AWAY")
         client.publish("inTopic", ("BIG" if param[0] else "SMALL"))
-        blockedCoords += location
+        blockedCoords.append(location)
 
 cam = cv2.VideoCapture(0)
-frameSize = (400, 300)
+frameSize = (640, 480)
 kernel = (5,5)
 satConst = 15
 clicked.last_call = 0
@@ -88,7 +89,7 @@ client.connect("localhost", 1883, 60)
 client.loop_start()
 print("Subscribing to topic","outTopic")
 client.subscribe("outTopic")
-print("Publishing message to topic","inTopic")
+print("LOL TESTING CHANGEPublishing message to topic","inTopic")
 client.publish("inTopic","OFFlmfao")
 
 with open('calibration.json', 'r') as openfile:
@@ -110,14 +111,28 @@ while True:
     if oStats[0] and oStats[2] > pStats[2]:
         #print("ORANGE")
         param[0]=False
-        blocked = any([geopy.distance.distance(location, x) < BLOCKDIST for x in blockedCoords])
+        try:
+            if len(blockedCoords) > 0:
+                blocked = any([geopy.distance.distance(location, x).m < BLOCKDIST for x in blockedCoords])
+            else:
+                blocked = False
+        except Exception as e:
+            print("Error:", e, type(location), "Blocked:",type(blockedCoords[0]))
+            break
         cv2.drawContours(orig_copy, [oStats[1]], -1, (1, 65, 116) if not blocked else (170,170,170), 3)
         contour = oStats[1]
 
     elif pStats[0] and pStats[2] > oStats[2]:
         #print("Purple")
         param[0]=True
-        blocked = any([geopy.distance.distance(location, x) < BLOCKDIST for x in blockedCoords])
+        try:
+            if len(blockedCoords) > 0:
+                blocked = any([geopy.distance.distance(location, x).m < BLOCKDIST for x in blockedCoords])
+            else:
+                blocked = False
+        except Exception as e:
+            print("Error:", e, type(location), "Blocked:",type(blockedCoords[0]))
+            break
         cv2.drawContours(orig_copy, [pStats[1]], -1, (103, 1, 103)  if not blocked else (170,170,170), 3)
         contour = pStats[1]
     else:

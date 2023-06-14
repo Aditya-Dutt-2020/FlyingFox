@@ -8,9 +8,10 @@ import numpy as np
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
+cv2.namedWindow("image", cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty("image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 CNTSIZETHRESH = 5000
-DROPRAD = 50
+DROPRAD = 100
 BLOCKRAD = 30
 CHECKING = False
 CLICKED = False
@@ -68,7 +69,7 @@ def clicked(channel):
         client.publish("inTopic", ("BIG" if param[0] else "SMALL"))
 
 cam = cv2.VideoCapture(0)
-frameSize = (400, 300)
+frameSize = (640, 480)
 kernel = (5,5)
 satConst = 15
 clicked.last_call = 0
